@@ -15,26 +15,45 @@ async function readFile () {
     return inputString.split('\n')
 }
 
+function formatInput(inputArray) {
+    let formattedArray = [];
+    let tempArray = [];
 
-function findMostCalories(inputArray) {
-    let mostCalories = 0;
-    let tempArray = []
-    let tempArrayCalories = 0;
-
-    for (let i = 0; i < inputArray.length; i++) {
-        const element = inputArray[i];
-        tempArray.push(element)
-    
-        if (element === '') {
-            tempArrayCalories = tempArray.filter((e) => e !== '' ).reduce((a,b) => parseInt(a) + parseInt(b))
-            mostCalories = tempArrayCalories > mostCalories ? tempArrayCalories : mostCalories;
+    inputArray.forEach(e => {
+        if (e  !== '') {
+            tempArray.push(e);
+        } else {
+            formattedArray.push(tempArray);
             tempArray = [];
-            tempArrayCalories = 0;
         }
-    }
-    
-    return mostCalories;
+    })
+    return formattedArray;
 }
 
-const inputArray = await readFile()
-findMostCalories(inputArray)
+
+function findMostCalories(formattedInput, calorieArray = []) {
+    if (calorieArray.length === 3) {
+        const summedTotal = calorieArray.reduce((a,c) => parseInt(a) + parseInt(c));
+        return summedTotal;
+    }
+    
+    let mostCalories = 0;
+    let mostCaloriesIndex = 0;
+
+    for (let i = 0; i < formattedInput.length; i++) {
+        const elfArray = formattedInput[i];
+        const currentMealCalorieTotal = elfArray.reduce((a,c) => parseInt(a) + parseInt(c))
+        if (currentMealCalorieTotal > mostCalories) {
+            mostCalories = currentMealCalorieTotal;
+            mostCaloriesIndex = i;
+        }
+    }
+
+    calorieArray.push(parseInt(mostCalories))
+    formattedInput.splice(mostCaloriesIndex, 1);
+    return findMostCalories(formattedInput, calorieArray);
+}
+
+const inputArray = await readFile();
+const formattedInput = formatInput(inputArray);
+findMostCalories(formattedInput);
